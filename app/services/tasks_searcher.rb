@@ -14,7 +14,7 @@ class TasksSearcher
 
   def apply_filters(tasks)
     tasks = tasks.where(:task_type.in => @params[:task_types]) if @params[:task_types].present?
-    tasks = tasks.where(:assigned_to_id.in => @params[:assigned_to_id]) if @params[:assigned_to_id].present?
+    tasks = tasks.where(:assigned_to_id.in => @params[:assigned_to_ids]) if @params[:assigned_to_ids].present?
     tasks = tasks.where(due_date: { "$gte" => DateTime.parse(@params[:due_date]) }) if @params[:due_date].present?
     tasks = tasks.where(created_at: { "$gte" => DateTime.parse(@params[:created_at]) }) if @params[:created_at].present?
     tasks = tasks.where(completed_at: { "$gte" => DateTime.parse(@params[:completed_at]) }) if @params[:completed_at].present?
