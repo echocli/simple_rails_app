@@ -4,66 +4,71 @@ class TasksController < ApplicationController
   def index
     # Use TasksSearcher to handle searching
     tasks_searcher = TasksSearcher.new(params)
-    tasks = tasks_searcher.search
+    @tasks = tasks_searcher.search
 
-    render json: tasks
+    render 'tasks/index', status: :ok  # Render the `index.json.jbuilder` view
   end
 
   def show
-    render json: @task
+    render 'tasks/show', status: :ok  # Render the `show.json.jbuilder` view
+  rescue ActiveRecord::RecordNotFound
+    render json: { error: "Task not found" }, status: :not_found
   end
 
   def create
-    task = Task.new(task_params)
+    @task = Task.new(task_params)
 
-    if task.save
-      render json: task, status: :created
+    if @task.save
+      render 'tasks/show', status: :created  # Render `show.json.jbuilder` for the created task
     else
-      render json: { errors: task.errors }, status: :unprocessable_entity
+      render json: { errors: @task.errors.full_messages }, status: :unprocessable_entity
     end
   end
 
   def update
     if @task.update(task_params)
-      render json: @task
+      render 'tasks/show', status: :ok  # Render `show.json.jbuilder` for the updated task
     else
-      render json: { errors: @task.errors }, status: :unprocessable_entity
+      render json: { errors: @task.errors.full_messages }, status: :unprocessable_entity
     end
   end
 
   def destroy
-    @task.destroy
-    head :no_content
+    if @task.destroy
+      render json: { message: "Task successfully deleted" }, status: :no_content
+    else
+      render json: { error: "Failed to delete task" }, status: :unprocessable_entity
+    end
   end
 
   def bulk_create
-    tasks = Task.insert_many(task_params[:tasks])
+    tasks = task_params[:tasks].map { |task_data| Task.new(task_data) }
+    tasks_saved = tasks.select(&:save)
 
-    if tasks.present?
-      render json: tasks, status: :created
+    if tasks_saved.any?
+      render 'tasks/bulk_create', status: :created  # Render `bulk_create.json.jbuilder` for created tasks
     else
-      render json: { errors: "Failed to create tasks" }, status: :unprocessable_entity
+      render json: { errors: tasks.reject(&:persisted?).map(&:errors) }, status: :unprocessable_entity
     end
   end
 
   def bulk_update
-    tasks = Task.where(id: task_params[:task_ids]).update_all(task_params[:task_updates])
+    updated_tasks = Task.where(id: task_params[:task_ids]).update_all(task_params[:task_updates])
 
-    if tasks > 0
-      render json: { message: "#{tasks} tasks updated successfully" }
+    if updated_tasks > 0
+      render json: { message: "#{updated_tasks} tasks successfully updated" }, status: :ok
     else
-      render json: { errors: "Failed to update tasks" }, status: :unprocessable_entity
+      render json: { error: "No tasks updated" }, status: :unprocessable_entity
     end
   end
 
   def bulk_assign
-    tasks = Task.where(id: task_params[:task_ids])
-                .update_all(assigned_to_id: task_params[:assigned_to_id])
+    updated_tasks = Task.where(id: task_params[:task_ids]).update_all(assigned_to_id: task_params[:assigned_to_id])
 
-    if tasks > 0
-      render json: { message: "#{tasks} tasks assigned successfully" }
+    if updated_tasks > 0
+      render json: { message: "#{updated_tasks} tasks successfully assigned" }, status: :ok
     else
-      render json: { errors: "Failed to assign tasks" }, status: :unprocessable_entity
+      render json: { error: "No tasks assigned" }, status: :unprocessable_entity
     end
   end
 
@@ -71,6 +76,8 @@ class TasksController < ApplicationController
 
   def set_task
     @task = Task.find(params[:id])
+  rescue ActiveRecord::RecordNotFound
+    render json: { error: "Task not found" }, status: :not_found
   end
 
   def task_params

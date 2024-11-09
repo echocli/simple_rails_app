@@ -3,13 +3,14 @@ class ProjectsController < ApplicationController
 
   # GET /projects
   def index
-    @projects = ProjectsSearcher.new(params).call
-    render json: @projects
+    projects_searcher = ProjectsSearcher.new(params)
+    @projects = projects_searcher.call
+    # Automatically renders app/views/projects/index.json.jbuilder
   end
 
   # GET /projects/:id
   def show
-    render json: @project
+    # Automatically renders app/views/projects/show.json.jbuilder
   end
 
   # POST /projects
@@ -17,25 +18,27 @@ class ProjectsController < ApplicationController
     @project = Project.new(project_params)
 
     if @project.save
-      render json: @project, status: :created, location: @project
+      # Automatically renders app/views/projects/show.json.jbuilder
+      render :show, status: :created, location: @project
     else
-      render json: @project.errors, status: :unprocessable_entity
+      render json: { errors: @project.errors.full_messages }, status: :unprocessable_entity
     end
   end
 
   # PUT /projects/:id
   def update
     if @project.update(project_params)
-      render json: @project
+      # Automatically renders app/views/projects/show.json.jbuilder
+      render :show, status: :ok
     else
-      render json: @project.errors, status: :unprocessable_entity
+      render json: { errors: @project.errors.full_messages }, status: :unprocessable_entity
     end
   end
 
   # DELETE /projects/:id
   def destroy
     @project.destroy
-    head :no_content
+    head :no_content # No content to return, 204 status code
   end
 
   # POST /projects/:id/assign_user
@@ -44,7 +47,8 @@ class ProjectsController < ApplicationController
 
     if user
       @project.update(user: user)
-      render json: @project, status: :ok
+      # Automatically renders app/views/projects/show.json.jbuilder
+      render :show, status: :ok
     else
       render json: { error: 'User not found' }, status: :not_found
     end
@@ -54,7 +58,8 @@ class ProjectsController < ApplicationController
   def change_status
     if Project::STATUSES.include?(params[:status])
       @project.update(status: params[:status])
-      render json: @project, status: :ok
+      # Automatically renders app/views/projects/show.json.jbuilder
+      render :show, status: :ok
     else
       render json: { error: 'Invalid status' }, status: :unprocessable_entity
     end
