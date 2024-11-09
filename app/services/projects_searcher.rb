@@ -2,56 +2,60 @@ class ProjectsSearcher
   def initialize(params)
     @params = params
     @criteria = Project
+    apply_filters
+    apply_sorting
   end
 
   def search
-    # Apply filters
-    @criteria = filter_by_name(@criteria)
-    @criteria = filter_by_description(@criteria)
-    @criteria = filter_by_status(@criteria)
-
-    # Apply sorting if specified
-    @criteria = apply_sorting(@criteria)
-
-    @criteria
+    @criteria.to_a
   end
 
   private
 
-  # Method to handle sorting logic
-  def apply_sorting(projects)
-    if @params[:sort_by].present?
-      sort_field = @params[:sort_by].to_sym # Convert to symbol for Mongoid compatibility
-      sort_order = @params[:sort_order] == 'asc' ? :asc : :desc  # Default to descending if not 'asc'
-      projects = projects.order_by(sort_field => sort_order)
-    end
-    projects
+  def apply_filters
+    # Apply general filters based on parameters
+    @criteria = filter_by_param(:project_ids, :id)
+    @criteria = filter_by_param(:project_types, :project_type_cd)
+    @criteria = filter_by_param(:statuses, :status_cd)
+    @criteria = filter_by_param(:creator_ids, :creator_id)
+    @criteria = filter_by_param(:assigned_to_ids, :assigned_to_id)
+
+    # Apply date range filters
+    @criteria = apply_date_range_filters
   end
 
-  # Filter by name using case-insensitive regex match
-  def filter_by_name(projects)
-    if @params[:query].present?
-      projects.where(name: /#{Regexp.escape(@params[:query])}/i)
-    else
-      projects
-    end
-  end
-
-  # Filter by description using case-insensitive regex match
-  def filter_by_description(projects)
-    if @params[:query].present?
-      projects.where(description: /#{Regexp.escape(@params[:query])}/i)
-    else
-      projects
+  def filter_by_param(param_key, field)
+    if @params[param_key].present?
+      @criteria = @criteria.where(field.in => @params[param_key])
     end
   end
 
-  # Filter by status
-  def filter_by_status(projects)
-    if @params[:status].present?
-      projects.where(status: @params[:status])
-    else
-      projects
+  def apply_date_range_filters
+    @criteria = apply_date_filter(:due_date)
+    @criteria = apply_date_filter(:created_at)
+    @criteria = apply_date_filter(:completed_at)
+    @criteria = apply_date_filter(:updated_at)
+  end
+
+  def apply_date_filter(field)
+    min_param = "#{field}_min".to_sym
+    max_param = "#{field}_max".to_sym
+
+    if @params[min_param].present? && @params[max_param].present?
+      @criteria = @criteria.where(field => { "$gte" => DateTime.parse(@params[min_param]), "$lte" => DateTime.parse(@params[max_param]) })
+    elsif @params[min_param].present?
+      @criteria = @criteria.where(field => { "$gte" => DateTime.parse(@params[min_param]) })
+    elsif @params[max_param].present?
+      @criteria = @criteria.where(field => { "$lte" => DateTime.parse(@params[max_param]) })
+    end
+
+  end
+
+  def apply_sorting
+    if @params[:sort_by_field].present?
+      # Ensuring sort_asc is boolean-like and applicable
+      direction = @params[:sort_asc] == "true" ? :asc : :desc
+      @criteria = @criteria.order_by(@params[:sort_by_field].to_sym => direction)
     end
   end
 end

@@ -2,30 +2,34 @@ class Project
   include Mongoid::Document
   include Mongoid::Timestamps
 
-  # Fields for the project model
   field :name, type: String
   field :description, type: String
   field :due_date, type: DateTime
-  field :status, type: String, default: "active" # active, completed, etc.
-  field :project_type, type: String # new field for project type
+  field :completed_at, type: DateTime
 
-  # Associations
+  enum :status, STATUSES
+  enum :project_type, PROJECT_TYPES
+
   has_many :tasks
-  belongs_to :user, optional: true # Optional, assuming a project could be assigned to a user
+  belongs_to :creator, class_name: "User"
+  belongs_to :assigned_to, class_name: "User"
 
-  # Validations
-  validates :name, presence: true
-  validates :due_date, presence: true
-  validates :project_type, presence: true, inclusion: { in: ["internal", "client", "research", "marketing", "development"] }
-
-  # Indexing for performance
   index({ name: 1 })
   index({ due_date: 1 })
-  index({ project_type: 1 }) # Indexing the project_type for better search performance
+  index({ project_type: 1 })
 
-  # Enum for project status
-  STATUSES = ["active", "completed", "archived"]
+  PROJECT_TYPES = {
+    internal: "internal",
+    client: "client",
+    research: "research",
+    marketing: "marketing",
+    development: "development"
+  }
 
-  # Enum for project types (optional if you want predefined project types)
-  PROJECT_TYPES = ["internal", "client", "research", "marketing", "development"]
+  STATUSES = {
+    todo: "todo",
+    pending: "pending",
+    completed: "completed",
+    archived: "archived"
+  }
 end

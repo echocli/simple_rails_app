@@ -1,37 +1,33 @@
 class UsersSearcher
-  attr_reader :params
-
   def initialize(params)
     @params = params
     @criteria = User
+    apply_filters
+    apply_sorting
   end
 
   def search
-    # Apply filters dynamically based on params
-    @criteria = apply_filters(@criteria)
-
-    # Apply sorting if specified (optional, can be added later)
-    @criteria = apply_sorting(@criteria)
-
     @criteria.to_a
   end
 
   private
 
-  # Apply filters based on search parameters
-  def apply_filters(users)
-    users = users.where(name: /#{Regexp.escape(@params[:name])}/i) if @params[:name].present?
-    users = users.where(email: /#{Regexp.escape(@params[:email])}/i) if @params[:email].present?
-
-    users
+  def apply_filters
+    # Apply general filters based on parameters
+    @criteria = filter_by_param(:user_ids, :id)
+    @criteria = filter_by_param(:emails, :email)
   end
 
-  # Optional: Apply sorting based on sort_by_field and sort_asc params
-  def apply_sorting(users)
-    if @params[:sort_by_field].present? && @params[:sort_asc].present?
-      sort_direction = @params[:sort_asc] == 'true' ? :asc : :desc
-      users = users.order_by(@params[:sort_by_field].to_sym => sort_direction)
+  def filter_by_param(param_key, field)
+    if @params[param_key].present?
+      @criteria = @criteria.where(field.in => @params[param_key])
     end
-    users
+  end
+
+  def apply_sorting
+    if @params[:sort_by_field].present?
+      direction = @params[:sort_asc] == "true" ? :asc : :desc
+      @criteria = @criteria.order_by(@params[:sort_by_field].to_sym => direction)
+    end
   end
 end
