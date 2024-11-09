@@ -5,12 +5,12 @@ class Task
   # Fields for the task model
   field :title, type: String
   field :description, type: String
-  field :task_type, type: String # Enum type (e.g., "bug", "feature", "improvement")
+  field :task_type, type: String
   field :due_date, type: DateTime
   field :completed_at, type: DateTime
   field :note, type: String
-  field :status, type: String, default: "pending" # pending, in-progress, completed
-  field :priority, type: Integer, default: 1 # e.g., 1 = low, 2 = medium, 3 = high
+  field :status, type: String
+  field :priority, type: Integer
 
   # Associations
   belongs_to :creator, class_name: "User", inverse_of: :created_tasks
@@ -30,5 +30,5 @@ class Task
   TASK_TYPES = ["bug", "feature", "improvement", "research"]
 
   # Enum for task status
-  STATUSES = ["pending", "in-progress", "completed"]
+  STATUSES = ["todo", "in-progress", "completed"]
 end

@@ -51,19 +51,16 @@ class TasksController < ApplicationController
 
   def task_params
     params.require(:task).permit(
+      :title,
+      :description,
       :task_type,
-      :assigned_to_id,
       :due_date,
-      :note,
-      :created_at,
-      :updated_at,
       :completed_at,
-      tasks: [:task_type, :assigned_to_id, :due_date, :note, :created_at, :updated_at],
-      task_ids: [],
-      task_updates: {},
-      sort_by_field: :task_due_at,
-      sort_asc: :true,
-      sort_desc: :false
+      :note,
+      :status,
+      :priority,
+      :assigned_to_id,
+      :project_id
     )
   end
 end
