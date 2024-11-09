@@ -41,30 +41,6 @@ class ProjectsController < ApplicationController
     head :no_content # No content to return, 204 status code
   end
 
-  # POST /projects/:id/assign_user
-  def assign_user
-    user = User.find_by(id: params[:user_id])
-
-    if user
-      @project.update(user: user)
-      # Automatically renders app/views/projects/show.json.jbuilder
-      render :show, status: :ok
-    else
-      render json: { error: 'User not found' }, status: :not_found
-    end
-  end
-
-  # PUT /projects/:id/change_status
-  def change_status
-    if Project::STATUSES.include?(params[:status])
-      @project.update(status: params[:status])
-      # Automatically renders app/views/projects/show.json.jbuilder
-      render :show, status: :ok
-    else
-      render json: { error: 'Invalid status' }, status: :unprocessable_entity
-    end
-  end
-
   private
 
   # Set project for actions that need it

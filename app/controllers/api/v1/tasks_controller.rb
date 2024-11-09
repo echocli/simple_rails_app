@@ -41,37 +41,6 @@ class TasksController < ApplicationController
     end
   end
 
-  def bulk_create
-    tasks = task_params[:tasks].map { |task_data| Task.new(task_data) }
-    tasks_saved = tasks.select(&:save)
-
-    if tasks_saved.any?
-      render 'tasks/bulk_create', status: :created  # Render `bulk_create.json.jbuilder` for created tasks
-    else
-      render json: { errors: tasks.reject(&:persisted?).map(&:errors) }, status: :unprocessable_entity
-    end
-  end
-
-  def bulk_update
-    updated_tasks = Task.where(id: task_params[:task_ids]).update_all(task_params[:task_updates])
-
-    if updated_tasks > 0
-      render json: { message: "#{updated_tasks} tasks successfully updated" }, status: :ok
-    else
-      render json: { error: "No tasks updated" }, status: :unprocessable_entity
-    end
-  end
-
-  def bulk_assign
-    updated_tasks = Task.where(id: task_params[:task_ids]).update_all(assigned_to_id: task_params[:assigned_to_id])
-
-    if updated_tasks > 0
-      render json: { message: "#{updated_tasks} tasks successfully assigned" }, status: :ok
-    else
-      render json: { error: "No tasks assigned" }, status: :unprocessable_entity
-    end
-  end
-
   private
 
   def set_task
