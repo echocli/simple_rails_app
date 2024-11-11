@@ -51,7 +51,7 @@ class TasksController < ApplicationController
       :status,
       :priority,
       :assigned_to_id,
-      :project_id
+      :project_id,
     )
   end
 end
