@@ -1,1 +1,2 @@
 # simple_rails_app
+THIS IS FOR INTERNAL REVIEW  _ A DRAFT _  NOT FINAL
