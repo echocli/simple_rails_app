@@ -2,7 +2,7 @@ class TasksController < ApplicationController
   before_action :set_task, only: [:show, :update, :destroy]
 
   def index
-    tasks_searcher = TasksSearcher.new(params)
+    tasks_searcher = TasksSearcher.new(task_params)
     @tasks = tasks_searcher.search
   end
 
