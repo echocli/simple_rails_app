@@ -1,3 +1,4 @@
+# https://api.rubyonrails.org/classes/ActionController/Base.html
 class ProjectsController < ApplicationController
   before_action :set_project, only: [:show, :update, :destroy, :assign_user, :change_status]
 

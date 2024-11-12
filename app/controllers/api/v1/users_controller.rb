@@ -1,3 +1,4 @@
+# https://api.rubyonrails.org/classes/ActionController/Base.html
 class UsersController < ApplicationController
   before_action :set_user, only: [:show, :update, :destroy]
 
