@@ -14,16 +14,16 @@ class TasksSearcher
 
   def apply_filters
     # Apply general filters based on parameters
-    @criteria = filter_by_param(:task_ids, :id)
-    @criteria = filter_by_param(:task_types, :task_type_cd)
-    @criteria = filter_by_param(:statuses, :status_cd)
-    @criteria = filter_by_param(:project_ids, :project_id)
-    @criteria = filter_by_param(:creator_ids, :creator_id)
-    @criteria = filter_by_param(:assigned_to_ids, :assigned_to_id)
-    @criteria = filter_by_param(:priorities, :priority_cd)
+    filter_by_param(:task_ids, :id)
+    filter_by_param(:task_types, :task_type_cd)
+    filter_by_param(:statuses, :status_cd)
+    filter_by_param(:project_ids, :project_id)
+    filter_by_param(:creator_ids, :creator_id)
+    filter_by_param(:assigned_to_ids, :assigned_to_id)
+    filter_by_param(:priorities, :priority_cd)
 
     # Apply date range filters
-    @criteria = apply_date_range_filters
+    apply_date_range_filters
   end
 
   def filter_by_param(param_key, field)
@@ -33,10 +33,10 @@ class TasksSearcher
   end
 
   def apply_date_range_filters
-    @criteria = apply_date_filter(:due_date)
-    @criteria = apply_date_filter(:created_at)
-    @criteria = apply_date_filter(:completed_at)
-    @criteria = apply_date_filter(:updated_at)
+    apply_date_filter(:due_date)
+    apply_date_filter(:created_at)
+    apply_date_filter(:completed_at)
+    apply_date_filter(:updated_at)
   end
 
   def apply_date_filter(field)
